@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Habit {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  icon        String   @default("check-circle")
+  color       String   @default("#6366F1")
+  days        String   @default("1,2,3,4,5,6,0")
+  isTemplate  Boolean  @default(true)
+  archived    Boolean  @default(false)
+  order       Int      @default(0)
+  startTime   String?
+  endTime     String?
+  timeSlots   String?  // JSON: {"default":{"start":"08:00","end":"10:00"},"0":{"start":"22:00","end":"23:00"}}
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  entries     Entry[]
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+}
+
+model Entry {
+  id        String   @id @default(cuid())
+  date      String
+  completed Boolean  @default(false)
+  note      String?
+  habitId   String
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([habitId, date])
+}
+
+model Assignment {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  icon        String   @default("📋")
+  color       String   @default("#3B82F6")
+  startDate   String
+  dueDate     String
+  completed   Boolean  @default(false)
+  completedAt String?
+  note        String?
+  archived    Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Errand {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  icon        String   @default("📌")
+  color       String   @default("#F59E0B")
+  date        String   // YYYY-MM-DD
+  time        String?  // HH:MM (24h format)
+  completed   Boolean  @default(false)
+  completedAt String?
+  note        String?
+  archived    Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Category {
+  id     String  @id @default(cuid())
+  name   String
+  icon   String?
+  color  String?
+  habits Habit[]
+}
